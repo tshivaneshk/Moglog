@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "819495450860",
+    "project_id": "moglog-a07ad",
+    "storage_bucket": "moglog-a07ad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819495450860:android:d5dacd303a819a24ef4dc9",
+        "android_client_info": {
+          "package_name": "com.skech.moglog"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "819495450860-0kcata8secte54o0919cos8u1gp823jt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.skech.moglog",
+            "certificate_hash": "ab63d1dc8b032106021deb570d4ea4689cab0d94"
+          }
+        },
+        {
+          "client_id": "819495450860-1937v953ljsnkn3tt7tto7d7scfc5t1j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhb-VmC-7d2hUJnwPVaz1igxqJGyV1pIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "819495450860-1937v953ljsnkn3tt7tto7d7scfc5t1j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
