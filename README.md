@@ -1,108 +1,104 @@
-# Moglog 📺
-
-> A modern, sleek, and intuitive general show tracking application built with **Jetpack Compose**, **Material 3**, and **Firebase**.
+# Moglog
 
 <p align="center">
-  <img src="Logo.png" alt="Moglog Logo" width="160" />
+  <img src="Logo.png" alt="Moglog Logo" width="140" />
+</p>
+
+<p align="center">
+  A clean and modern TV show tracking app for Android.
+</p>
+
+<p align="center">
+  <a href="https://github.com/tshivaneshk/Moglog/releases/latest"><img src="https://img.shields.io/github/v/release/tshivaneshk/Moglog?style=flat-square&color=2ECC71&label=Release" alt="Latest Release" /></a>
+  <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=flat-square&logo=android&logoColor=white" alt="Platform Android" />
+  <img src="https://img.shields.io/badge/Language-Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="Language Kotlin" />
+  <img src="https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose" />
+  <img src="https://img.shields.io/badge/Backend-Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black" alt="Firebase" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License MIT" /></a>
 </p>
 
 ---
 
-## 🌟 Overview
+## Overview
 
-**Moglog** is an all-in-one show tracking app designed for TV shows, web series, dramas, and anime enthusiasts. Keep track of what you're currently watching, plan upcoming titles, manage completed shows, and sync your watch history securely across devices.
+Moglog helps you keep track of TV series, web shows, and animated series in one place. You can record what you are currently watching, plan shows to watch later, and mark completed titles.
 
-With a focused Emerald & Charcoal aesthetic, smooth 120Hz display optimization, and offline-first capabilities, Moglog delivers a fast, responsive, and distraction-free viewing tracker.
-
----
-
-## ✨ Key Features
-
-- **Comprehensive Show Tracking**:
-  - Categorize shows seamlessly into **Watching**, **Planned**, and **Done** states.
-  - Search and discover TV shows and series with comprehensive metadata, posters, and details powered by TMDB.
-  - Custom notes and status management for every title on your watchlist.
-
-- **Offline-First Resilience**:
-  - Full local persistence with **Room Database** (SQLite).
-  - Use the app completely offline—browse, add, edit, or filter your shows without an internet connection.
-  - Graceful network timeout handling with contextual toasts when offline.
-
-- **Cloud Sync & Multi-Device Access**:
-  - **Firebase Authentication** supporting Google Sign-In and anonymous guest mode.
-  - Cloud backup and synchronization via **Cloud Firestore**.
-  - Flexible sync options: Automatic sync or configurable **Manual Only** sync frequency.
-  - Guest data preservation: Signing in or switching accounts safely preserves your locally tracked shows.
-
-- **Modern & Fluid UI / UX**:
-  - Crafted entirely with **Jetpack Compose** following modern Android architectural standards.
-  - Distinctive **Emerald & Charcoal** dark palette (60-30-10 design rule).
-  - Translucent floating action dock and refined iOS-style bottom controls.
-  - Complete responsiveness with adaptive navigation across portrait and landscape orientations.
-
-- **Privacy & Account Control**:
-  - Account deletion support directly from the app (wipes cloud document records and auth credentials).
-  - Option to back up and restore your TMDB API keys securely.
+The app works offline by default and can back up your watchlist to the cloud when you connect your Google account.
 
 ---
 
-## 🛠️ Architecture & Tech Stack
+## Features
 
-- **UI Toolkit**: [Jetpack Compose](https://developer.android.com/jetpack/compose) with Material 3 Design
-- **Architecture**: MVVM (Model-View-ViewModel) + Clean Architecture pattern
-- **Asynchronous & Concurrency**: Kotlin Coroutines & `StateFlow`
-- **Dependency Injection**: [Dagger Hilt](https://dagger.dev/hilt/)
-- **Local Persistence**: [Room Database](https://developer.android.com/training/data-storage/room)
-- **Image Loading**: [Coil](https://coil-kt.github.io/coil/) (memory & disk caching)
-- **Networking**: [Retrofit 2](https://square.github.io/retrofit/) + OkHttp
-- **Cloud Backend**:
-  - Firebase Authentication (Google Sign-In)
-  - Firebase Cloud Firestore (NoSQL cloud sync)
+- **Organized Watchlist**: Sort your shows into three clear tabs: Watching, Planned, and Done.
+- **Show Search**: Search for titles, view posters, cast details, overviews, and ratings powered by TMDB.
+- **Offline Support**: All your data is saved locally on your device. You can browse, add, and edit shows without an internet connection.
+- **Cloud Backup and Sync**: Sign in with Google to back up your watchlist to Firebase Cloud Firestore.
+- **Flexible Sync Settings**: Choose immediate automatic sync or manual sync whenever you prefer.
+- **Guest Friendly**: Start using the app immediately as a guest. When you sign in or sign out, your local watchlist remains safe.
+- **Clean Design**: Built with Material 3 in a dark Emerald and Charcoal theme, featuring smooth animations and support for both portrait and landscape modes.
 
 ---
 
-## 🚀 Getting Started
+## Tech Stack
+
+| Component | Technology |
+| :--- | :--- |
+| **User Interface** | Jetpack Compose, Material 3 |
+| **Programming Language** | Kotlin |
+| **Architecture** | MVVM (Model-View-ViewModel) |
+| **Local Database** | Room (SQLite) |
+| **Cloud Services** | Firebase Authentication, Cloud Firestore |
+| **Dependency Injection** | Dagger Hilt |
+| **Networking** | Retrofit, OkHttp |
+| **Image Loading** | Coil |
+
+---
+
+## Installation
+
+### Download the APK
+
+You can download the pre-built APK file directly on your Android phone:
+
+1. Open the [Releases page](https://github.com/tshivaneshk/Moglog/releases/latest).
+2. Download `Moglog-v1.0.0.apk`.
+3. Open the downloaded file to install it on your device (Android 7.0 or higher required).
+
+---
+
+## Building from Source
 
 ### Prerequisites
 
-- **Android Studio**: Ladybug / Hedgehog or newer
-- **JDK**: Version 17 or higher
-- **Android SDK**: Min SDK 24, Target SDK 35
+- Android Studio Ladybug or newer
+- JDK 17 or higher
+- Android SDK (API 24 to API 35)
 
-### Setup Instructions
+### Steps
 
-1. **Clone the Repository**:
+1. Clone this repository:
    ```bash
    git clone https://github.com/tshivaneshk/Moglog.git
    cd Moglog
    ```
 
-2. **Configure Firebase**:
+2. Add Firebase configuration:
    - Create a project on the [Firebase Console](https://console.firebase.google.com/).
-   - Enable **Authentication** (Google Sign-In Provider) and **Cloud Firestore**.
-   - Download your `google-services.json` file.
-   - Place `google-services.json` in the `app/` directory (see [`app/google-services.json.example`](app/google-services.json.example)).
+   - Enable **Google Sign-In** under Authentication.
+   - Create a **Firestore Database**.
+   - Download `google-services.json` and place it inside the `app/` folder (refer to `app/google-services.json.example`).
 
-3. **TMDB API Key (Optional)**:
-   - Obtain a free API key from [The Movie Database (TMDB)](https://www.themoviedb.org/).
-   - Add your API key directly inside the app's **Settings** screen or sync it to your cloud profile.
+3. Add your TMDB API Key:
+   - Get an API key from [The Movie Database (TMDB)](https://www.themoviedb.org/).
+   - Enter your key in the app Settings screen.
 
-4. **Build & Run**:
-   - Open the project in Android Studio.
-   - Sync Gradle files.
-   - Run on an emulator or a physical device:
-     ```bash
-     ./gradlew assembleDebug
-     ```
+4. Build and install:
+   ```bash
+   ./gradlew assembleDebug
+   ```
 
 ---
 
-## 📦 Releases
+## License
 
-Download the latest ready-to-install APK from the [Releases](https://github.com/tshivaneshk/Moglog/releases) section.
-
----
-
-## 📄 License
-
-This project is open-source and available under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE).
