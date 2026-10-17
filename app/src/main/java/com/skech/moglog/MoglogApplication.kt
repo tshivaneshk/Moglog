@@ -7,8 +7,8 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.google.firebase.FirebaseApp
+import com.google.firebase.appcheck.AppCheckProviderFactory
 import com.google.firebase.appcheck.FirebaseAppCheck
-import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.skech.moglog.data.sync.EpisodeReminderWorker
 import com.skech.moglog.data.sync.RecycleBinPurgeWorker
@@ -27,8 +27,15 @@ class MoglogApplication : Application() {
         try {
             FirebaseApp.initializeApp(this)
             val appCheck = FirebaseAppCheck.getInstance()
-            val providerFactory = if (BuildConfig.DEBUG) {
-                DebugAppCheckProviderFactory.getInstance()
+            val providerFactory: AppCheckProviderFactory = if (BuildConfig.DEBUG) {
+                runCatching {
+                    val debugClass = Class.forName(
+                        "com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory"
+                    )
+                    debugClass.getMethod("getInstance").invoke(null) as AppCheckProviderFactory
+                }.getOrElse {
+                    PlayIntegrityAppCheckProviderFactory.getInstance()
+                }
             } else {
                 PlayIntegrityAppCheckProviderFactory.getInstance()
             }
