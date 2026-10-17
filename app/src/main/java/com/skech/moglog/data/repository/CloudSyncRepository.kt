@@ -1,7 +1,9 @@
 package com.skech.moglog.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.skech.moglog.data.local.ApiKeyManager
 import com.skech.moglog.domain.model.Drama
 import kotlinx.coroutines.tasks.await
@@ -13,37 +15,40 @@ class CloudSyncRepository(
 ) {
     suspend fun syncToCloud(dramas: List<Drama>) {
         val user = auth.currentUser ?: return
-        val apiKey = apiKeyManager.getApiKey() ?: ""
-        
-        val data = hashMapOf(
-            "tmdbApiKey" to apiKey,
+
+        val data = hashMapOf<String, Any>(
             "dramas" to dramas,
-            "lastSyncedAt" to System.currentTimeMillis()
+            "lastSyncedAt" to System.currentTimeMillis(),
+            // Explicitly delete any legacy plaintext tmdbApiKey stored in Firestore
+            "tmdbApiKey" to FieldValue.delete()
         )
-        
+
         try {
             firestore.collection("users")
                 .document(user.uid)
-                .set(data)
+                .set(data, SetOptions.merge())
                 .await()
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (_: Exception) {
         }
     }
 
     suspend fun fetchFromCloud(): CloudData? {
         val user = auth.currentUser ?: return null
-        
+
         return try {
-            val snapshot = firestore.collection("users")
-                .document(user.uid)
-                .get()
-                .await()
-                
+            val docRef = firestore.collection("users").document(user.uid)
+            val snapshot = docRef.get().await()
+
             if (snapshot.exists()) {
-                val apiKey = snapshot.getString("tmdbApiKey")
-                
-                // Firestore arrays of objects come back as Lists of HashMaps, we need to map them back
+                // If legacy doc still has tmdbApiKey in cloud, purge it from Firestore immediately
+                if (snapshot.contains("tmdbApiKey")) {
+                    try {
+                        docRef.update(mapOf("tmdbApiKey" to FieldValue.delete())).await()
+                    } catch (_: Exception) {
+                    }
+                }
+
+                @Suppress("UNCHECKED_CAST")
                 val dramasRaw = snapshot.get("dramas") as? List<Map<String, Any>> ?: emptyList()
                 val dramas = dramasRaw.map { map ->
                     Drama(
@@ -61,18 +66,16 @@ class CloudSyncRepository(
                         completedAt = (map["completedAt"] as? Number)?.toLong() ?: 0L
                     )
                 }
-                CloudData(apiKey, dramas)
+                CloudData(dramas = dramas)
             } else {
                 null
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (_: Exception) {
             null
         }
     }
 }
 
 data class CloudData(
-    val apiKey: String?,
     val dramas: List<Drama>
 )

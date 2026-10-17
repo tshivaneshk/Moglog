@@ -44,8 +44,7 @@ fun SettingsScreen(
     
     val context = LocalContext.current
     val currentUser = authViewModel?.currentUser?.collectAsState()?.value
-    val apiKeyManager = remember { com.skech.moglog.data.local.ApiKeyManager(context) }
-    var syncFrequency by remember { mutableStateOf(apiKeyManager.getSyncFrequency()) }
+    var syncFrequency by remember { mutableStateOf(viewModel.apiKeyManager.getSyncFrequency()) }
 
     
     val exportLauncher = rememberLauncherForActivityResult(
@@ -413,14 +412,14 @@ fun SettingsScreen(
                 Button(
                     onClick = {
                         isDeleting = true
-                        authViewModel?.deleteAccount { success ->
+                        authViewModel?.deleteAccount { success, errMsg ->
                             isDeleting = false
                             showDeleteWarning = false
                             if (success) {
                                 Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_LONG).show()
                                 onBack()
                             } else {
-                                Toast.makeText(context, "Failed to delete account. Please try again.", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, errMsg ?: "Failed to delete account. Please try again.", Toast.LENGTH_LONG).show()
                             }
                         }
                     },

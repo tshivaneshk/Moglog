@@ -1,3 +1,185 @@
 <resources>
     <string name="app_name">Moglog</string>
+    <string name="web_client_id" translatable="false">819495450860-1937v953ljsnkn3tt7tto7d7scfc5t1j.apps.googleusercontent.com</string>
+
+    <!-- Navigation Tabs -->
+    <string name="tab_library">Library</string>
+    <string name="tab_discover">Discover</string>
+    <string name="tab_stats">Stats</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- Statuses & Filters -->
+    <string name="status_all">All</string>
+    <string name="status_watching">Watching</string>
+    <string name="status_planned">Planned</string>
+    <string name="status_done">Done</string>
+
+    <!-- Sort Options -->
+    <string name="sort_recently_added">Recently Added</string>
+    <string name="sort_recently_updated">Recently Updated</string>
+    <string name="sort_recently_completed">Recently Completed</string>
+    <string name="sort_tmdb_rating">TMDB Rating</string>
+    <string name="sort_my_rating">My Rating</string>
+    <string name="sort_title_az">Title (A–Z)</string>
+    <string name="sort_release_year">Release Year</string>
+
+    <!-- Library Screen -->
+    <string name="library_title">Library</string>
+    <string name="library_search_placeholder">Search your library</string>
+    <string name="continue_watching_title">Continue Watching</string>
+    <string name="plus_one_ep">+1 Ep</string>
+    <string name="sort_and_filter">Sort &amp; Filter</string>
+    <string name="add_show_cd">Add show</string>
+    <string name="toggle_layout_cd">Toggle grid or list view</string>
+    <string name="multi_select_title">%1$d Selected</string>
+    <string name="multi_select_cancel">Done</string>
+    <string name="empty_library_title">Your Library is Empty</string>
+    <string name="empty_library_subtitle">Track your favorite series, episode progress, ratings, and personal notes in one clean place.</string>
+    <string name="empty_library_cta">Discover Shows</string>
+    <string name="empty_filter_title">No Matching Shows</string>
+    <string name="empty_filter_subtitle">Try adjusting your search query or clearing active filters.</string>
+    <string name="clear_filters">Clear Filters</string>
+
+    <!-- Context Menu & Swipe Actions -->
+    <string name="action_mark_next_ep">Watch Next Episode (+1)</string>
+    <string name="action_change_status">Change Status</string>
+    <string name="action_rate_show">Rate Show</string>
+    <string name="action_edit_note">Add / Edit Note</string>
+    <string name="action_select_multiple">Select Shows</string>
+    <string name="action_share">Share Show</string>
+    <string name="action_move_to_bin">Move to Recycle Bin</string>
+    <string name="action_undo">Undo</string>
+    <string name="toast_moved_to_bin">Moved \"%1$s\" to Recycle Bin</string>
+    <string name="toast_episode_incremented">%1$s · Episode %2$d</string>
+    <string name="toast_status_updated">Marked \"%1$s\" as %2$s</string>
+
+    <!-- Discover Screen -->
+    <string name="discover_title">Discover</string>
+    <string name="discover_search_placeholder">Shows, anime, dramas…</string>
+    <string name="discover_recent_searches">Recent Searches</string>
+    <string name="discover_clear_recent">Clear</string>
+    <string name="rail_trending">Trending This Week</string>
+    <string name="rail_popular">Popular Right Now</string>
+    <string name="rail_airing_today">Airing Today</string>
+    <string name="rail_on_the_air">Currently On The Air</string>
+    <string name="discover_no_key_title">TMDB API Key Required</string>
+    <string name="discover_no_key_subtitle">Add your free TMDB API key or Read Access Token in Settings to browse trending shows and search the catalog.</string>
+    <string name="discover_configure_key">Configure API Key</string>
+    <string name="discover_no_results">No shows found for \"%1$s\"</string>
+    <string name="discover_added_to_planned">Added \"%1$s\" to Planned</string>
+
+    <!-- Detail Screen -->
+    <string name="detail_back_cd">Back</string>
+    <string name="detail_more_cd">More actions</string>
+    <string name="detail_in_library">In Library</string>
+    <string name="detail_progress_title">Episode Progress</string>
+    <string name="detail_season_label">Season %1$d</string>
+    <string name="detail_episodes_watched_format">%1$d of %2$d episodes watched</string>
+    <string name="detail_episodes_watched_unknown_total">%1$d episodes watched</string>
+    <string name="detail_promote_to_done_title">Finished \"%1$s\"?</string>
+    <string name="detail_promote_to_done_subtitle">You\'ve reached the final episode. Would you like to mark this show as Done?</string>
+    <string name="detail_mark_as_done">Mark as Done</string>
+    <string name="detail_keep_watching">Keep in Watching</string>
+    <string name="detail_my_rating_title">My Rating</string>
+    <string name="detail_not_rated">Not rated</string>
+    <string name="detail_notes_title">Personal Notes &amp; Tags</string>
+    <string name="detail_notes_placeholder">Write episode thoughts, quotes, or reminders…</string>
+    <string name="detail_tags_placeholder">Tags (comma separated, e.g. sci-fi, comfort)</string>
+    <string name="detail_synopsis_title">Overview</string>
+    <string name="detail_synopsis_empty">No overview available.</string>
+    <string name="detail_read_more">more</string>
+    <string name="detail_read_less">less</string>
+    <string name="detail_where_to_watch">Where to Watch</string>
+    <string name="detail_shortcut_title">Quick Launch Shortcut</string>
+    <string name="detail_add_shortcut">Set Streaming App or Link</string>
+    <string name="detail_open_shortcut">Open in %1$s</string>
+    <string name="detail_remove_shortcut">Remove Shortcut</string>
+    <string name="detail_cast_title">Cast</string>
+    <string name="detail_similar_title">Similar Shows</string>
+    <string name="detail_watch_trailer">Watch Trailer</string>
+    <string name="detail_search_web">Search Web</string>
+    <string name="detail_add_to_library">Add to Library</string>
+    <string name="detail_save_changes">Update Library</string>
+    <string name="detail_next_air_date">Next episode (S%1$02dE%2$02d) airs %3$s</string>
+
+    <!-- Stats Screen -->
+    <string name="stats_title">Statistics</string>
+    <string name="stats_total_shows">Total Shows</string>
+    <string name="stats_episodes_watched">Episodes</string>
+    <string name="stats_hours_watched">Est. Hours</string>
+    <string name="stats_completion_streak">Monthly Streak</string>
+    <string name="stats_status_breakdown">Status Breakdown</string>
+    <string name="stats_genre_breakdown">Top Genres</string>
+    <string name="stats_monthly_activity">Completions &amp; Activity (Last 12 Months)</string>
+    <string name="stats_top_rated">Your Highest Rated</string>
+    <string name="stats_empty_subtitle">Add shows and log episodes to unlock visual insights into your watching habits.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_account">ACCOUNT &amp; CLOUD</string>
+    <string name="settings_section_appearance">APPEARANCE</string>
+    <string name="settings_section_security">SECURITY &amp; PRIVACY</string>
+    <string name="settings_section_data">DATA &amp; BACKUP</string>
+    <string name="settings_section_api">TMDB API</string>
+    <string name="settings_section_about">ABOUT</string>
+    <string name="settings_sign_in_google">Sign In with Google</string>
+    <string name="settings_sign_out">Sign Out</string>
+    <string name="settings_delete_account">Delete Cloud Account</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_dynamic_tint">Dynamic Poster Tint</string>
+    <string name="settings_grid_density">Poster Grid Columns</string>
+    <string name="settings_app_lock">Biometric App Lock</string>
+    <string name="settings_lock_timeout">Lock Timeout</string>
+    <string name="settings_hide_recents">Blur / Hide in App Switcher</string>
+    <string name="settings_e2e_backup">End-to-End Encrypted Cloud Backup</string>
+    <string name="settings_set_passphrase">Set Backup Passphrase</string>
+    <string name="settings_sync_now">Sync Now</string>
+    <string name="settings_restore_cloud">Restore from Cloud Backup</string>
+    <string name="settings_sync_frequency">Auto-Sync Frequency</string>
+    <string name="settings_export_encrypted">Export Encrypted Backup (.moglog)</string>
+    <string name="settings_export_json">Export Plaintext JSON</string>
+    <string name="settings_import_backup">Import Backup (.moglog / .json)</string>
+    <string name="settings_recycle_bin">Recycle Bin</string>
+    <string name="settings_episode_reminders">New Episode Notifications</string>
+    <string name="settings_clear_cache">Clear TMDB Metadata Cache</string>
+    <string name="settings_api_key_label">TMDB API Key / Read Token</string>
+    <string name="settings_api_configured">Configured</string>
+    <string name="settings_api_not_set">Not Set</string>
+    <string name="settings_privacy_policy">Privacy &amp; Security Architecture</string>
+    <string name="settings_developer">Developer</string>
+    <string name="settings_developer_name">T Shivanesh Kumar (SKECH®)</string>
+    <string name="settings_version">Version 2.0 (SQLCipher + Tink E2E)</string>
+
+    <!-- Recycle Bin -->
+    <string name="recycle_bin_title">Recycle Bin</string>
+    <string name="recycle_bin_empty_action">Empty</string>
+    <string name="recycle_bin_empty_title">Recycle Bin is Empty</string>
+    <string name="recycle_bin_empty_subtitle">Deleted shows stay here for 30 days before being permanently removed.</string>
+    <string name="recycle_bin_restore">Restore</string>
+    <string name="recycle_bin_delete_forever">Delete Permanently</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_step1_title">Track Every Episode</string>
+    <string name="onboarding_step1_subtitle">A clean, fluid library for your dramas, series, and anime—encrypted on your device by default.</string>
+    <string name="onboarding_step2_title">Connect to TMDB</string>
+    <string name="onboarding_step2_subtitle">Paste your free TMDB v3 API Key (32 hex chars) or v4 Read Access Token to unlock search, posters, cast, and air dates.</string>
+    <string name="onboarding_how_to_get_key">How to get a free TMDB key</string>
+    <string name="onboarding_paste_clipboard">Paste from Clipboard</string>
+    <string name="onboarding_step3_title">Zero-Knowledge Cloud Sync</string>
+    <string name="onboarding_step3_subtitle">Optionally sign in with Google and set a passphrase to back up your library with AES-256-GCM end-to-end encryption.</string>
+
+    <!-- Common -->
+    <string name="common_cancel">Cancel</string>
+    <string name="common_save">Save</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_confirm">Confirm</string>
+    <string name="common_apply">Apply</string>
+    <string name="common_reset">Reset</string>
+    <string name="offline_banner">Offline · Showing cached library</string>
 </resources>

@@ -10,21 +10,40 @@ interface TmdbApi {
     @GET("search/tv")
     suspend fun searchDramas(
         @Query("query") query: String,
-        @Query("api_key") apiKey: String = "b30d871ab7f51c18054f0e6d0921da16",
         @Query("language") language: String = "en-US"
     ): SearchResponse
 
     @GET("tv/{tv_id}")
     suspend fun getDramaDetails(
         @Path("tv_id") id: Int,
-        @Query("api_key") apiKey: String = "b30d871ab7f51c18054f0e6d0921da16",
         @Query("language") language: String = "en-US",
-        @Query("append_to_response") appendToResponse: String = "credits,videos"
+        @Query("append_to_response") appendToResponse: String = "credits,videos,watch/providers,recommendations"
     ): DramaDto
 
+    @GET("trending/tv/week")
+    suspend fun getTrendingDramas(
+        @Query("language") language: String = "en-US"
+    ): SearchResponse
+
+    @GET("tv/popular")
+    suspend fun getPopularDramas(
+        @Query("language") language: String = "en-US"
+    ): SearchResponse
+
+    @GET("tv/airing_today")
+    suspend fun getAiringTodayDramas(
+        @Query("language") language: String = "en-US"
+    ): SearchResponse
+
+    @GET("tv/on_the_air")
+    suspend fun getOnTheAirDramas(
+        @Query("language") language: String = "en-US"
+    ): SearchResponse
 
     companion object {
         const val BASE_URL = "https://api.themoviedb.org/3/"
         const val IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
+        const val BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w780"
+        const val LOGO_BASE_URL = "https://image.tmdb.org/t/p/w154"
     }
 }

@@ -1,26 +1,38 @@
 package com.skech.moglog.ui.viewmodel
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.skech.moglog.data.auth.GoogleAuthClient
+import com.skech.moglog.data.auth.SignInResult
+import com.skech.moglog.data.local.ApiKeyManager
+import com.skech.moglog.data.repository.CloudData
 import com.skech.moglog.data.repository.CloudSyncRepository
 import com.skech.moglog.domain.model.Drama
+import com.skech.moglog.domain.repository.DramaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
+    @ApplicationContext private val context: Context,
     val authClient: GoogleAuthClient,
     private val cloudSyncRepository: CloudSyncRepository,
-    private val dramaRepository: com.skech.moglog.domain.repository.DramaRepository,
-    private val apiKeyManager: com.skech.moglog.data.local.ApiKeyManager
+    private val dramaRepository: DramaRepository,
+    private val apiKeyManager: ApiKeyManager
 ) : ViewModel() {
 
     private val _currentUser = MutableStateFlow<FirebaseUser?>(authClient.getSignedInUser())
@@ -29,7 +41,7 @@ class AuthViewModel @Inject constructor(
     private val _isSyncing = MutableStateFlow(false)
     val isSyncing = _isSyncing.asStateFlow()
 
-    fun signIn(result: com.skech.moglog.data.auth.SignInResult) {
+    fun signIn(result: SignInResult) {
         _currentUser.value = result.data
         if (result.data != null) {
             viewModelScope.launch {
@@ -41,92 +53,97 @@ class AuthViewModel @Inject constructor(
     fun signOut() {
         authClient.signOut()
         _currentUser.value = null
-        apiKeyManager.setApiKey("")
+        // Do NOT wipe the user's local TMDB API key on sign-out
     }
 
     suspend fun checkAccountExists(uid: String): Boolean {
         return try {
             val doc = cloudSyncRepository.firestore.collection("users").document(uid).get().await()
             doc.exists()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
 
-    fun deleteAccount(onComplete: (Boolean) -> Unit) {
+    fun deleteAccount(deleteLocalData: Boolean = false, onComplete: (Boolean, String?) -> Unit) {
         val user = _currentUser.value
-        if (user != null) {
-            viewModelScope.launch {
-                try {
-                    cloudSyncRepository.firestore.collection("users").document(user.uid).delete().await()
-                } catch (e: Exception) {
-                    e.printStackTrace()
+        if (user == null) {
+            onComplete(false, "Not signed in")
+            return
+        }
+        viewModelScope.launch {
+            try {
+                // Delete backup subcollection chunks if present
+                val backupDocs = cloudSyncRepository.firestore
+                    .collection("users")
+                    .document(user.uid)
+                    .collection("backup")
+                    .get()
+                    .await()
+                for (doc in backupDocs.documents) {
+                    doc.reference.delete().await()
                 }
-                try {
-                    user.delete().await()
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                cloudSyncRepository.firestore.collection("users").document(user.uid).delete().await()
+                user.delete().await()
+                if (deleteLocalData) {
+                    dramaRepository.clearAllDramas()
                 }
                 signOut()
-                onComplete(true)
+                onComplete(true, null)
+            } catch (e: Exception) {
+                onComplete(false, e.localizedMessage ?: "Re-authentication required to delete account.")
             }
-        } else {
-            onComplete(false)
         }
     }
 
-    private fun isOnline(): Boolean {
-        val cm = context.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
-        val activeNetwork = cm.activeNetworkInfo
-        return activeNetwork?.isConnectedOrConnecting == true
+    fun isOnline(): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
+        val network = cm.activeNetwork ?: return false
+        val capabilities = cm.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     fun syncToCloud(dramas: List<Drama>) {
         viewModelScope.launch {
             if (!isOnline()) {
-                android.widget.Toast.makeText(context, "Offline: Cannot sync to cloud.", android.widget.Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Offline: Cannot sync to cloud.", Toast.LENGTH_SHORT).show()
                 return@launch
             }
             _isSyncing.value = true
             try {
-                kotlinx.coroutines.withTimeout(8000) {
+                withTimeout(8000) {
                     cloudSyncRepository.syncToCloud(dramas)
                 }
-            } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
-                android.widget.Toast.makeText(context, "Sync timed out. Connection is too slow.", android.widget.Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                android.widget.Toast.makeText(context, "Sync failed.", android.widget.Toast.LENGTH_SHORT).show()
+            } catch (_: TimeoutCancellationException) {
+                Toast.makeText(context, "Sync timed out. Connection is too slow.", Toast.LENGTH_SHORT).show()
+            } catch (_: Exception) {
+                Toast.makeText(context, "Sync failed.", Toast.LENGTH_SHORT).show()
             }
             _isSyncing.value = false
         }
     }
 
-    suspend fun fetchFromCloud(): com.skech.moglog.data.repository.CloudData? {
+    suspend fun fetchFromCloud(): CloudData? {
         if (!isOnline()) {
-            android.os.Handler(android.os.Looper.getMainLooper()).post {
-                android.widget.Toast.makeText(context, "Offline: Using local data.", android.widget.Toast.LENGTH_SHORT).show()
-            }
             return null
         }
         _isSyncing.value = true
-        var data: com.skech.moglog.data.repository.CloudData? = null
+        var data: CloudData? = null
         try {
-            kotlinx.coroutines.withTimeout(8000) {
+            withTimeout(8000) {
                 data = cloudSyncRepository.fetchFromCloud()
-                if (data != null) {
-                    if (!data!!.apiKey.isNullOrEmpty()) {
-                        apiKeyManager.setApiKey(data!!.apiKey)
-                    }
-                    data!!.dramas.forEach { drama ->
-                        dramaRepository.saveDrama(drama)
+                val fetchedDramas = data?.dramas
+                if (!fetchedDramas.isNullOrEmpty()) {
+                    val localMap = dramaRepository.getAllDramas().first().associateBy { it.id }
+                    fetchedDramas.forEach { remoteDrama ->
+                        val local = localMap[remoteDrama.id]
+                        if (local == null || remoteDrama.updatedAt >= local.updatedAt) {
+                            dramaRepository.saveDrama(remoteDrama)
+                        }
                     }
                 }
             }
-        } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
-            android.os.Handler(android.os.Looper.getMainLooper()).post {
-                android.widget.Toast.makeText(context, "Fetch timed out.", android.widget.Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
         }
         _isSyncing.value = false
         return data

@@ -304,8 +304,7 @@ fun MyListScreen(
                                 }
                             }
 
-                            val context = LocalContext.current
-                            val syncFreq = remember { com.skech.moglog.data.local.ApiKeyManager(context).getSyncFrequency() }
+                            val syncFreq = "Manual Only"
                             if (syncFreq == "Manual Only") {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 androidx.compose.material3.OutlinedButton(
