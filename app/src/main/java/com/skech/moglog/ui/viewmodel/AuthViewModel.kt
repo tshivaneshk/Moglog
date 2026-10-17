@@ -50,6 +50,18 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun createAccountAndSync(result: SignInResult, dramas: List<Drama>, onComplete: ((Boolean) -> Unit)? = null) {
+        _currentUser.value = result.data
+        if (result.data != null) {
+            viewModelScope.launch {
+                val success = syncToCloudInternal(dramas)
+                onComplete?.invoke(success)
+            }
+        } else {
+            onComplete?.invoke(false)
+        }
+    }
+
     fun signOut() {
         authClient.signOut()
         _currentUser.value = null
@@ -103,23 +115,33 @@ class AuthViewModel @Inject constructor(
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
+    suspend fun syncToCloudInternal(dramas: List<Drama>): Boolean {
+        if (!isOnline()) {
+            Toast.makeText(context, "Offline: Cannot sync to cloud.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        _isSyncing.value = true
+        var success = false
+        try {
+            withTimeout(15000) {
+                cloudSyncRepository.syncToCloud(dramas)
+                success = true
+            }
+        } catch (e: TimeoutCancellationException) {
+            android.util.Log.e("MoglogAuth", "Cloud sync timed out", e)
+            Toast.makeText(context, "Sync timed out. Connection is too slow.", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            android.util.Log.e("MoglogAuth", "Cloud sync failed", e)
+            Toast.makeText(context, "Sync failed: ${e.localizedMessage ?: "Unknown error"}", Toast.LENGTH_SHORT).show()
+        } finally {
+            _isSyncing.value = false
+        }
+        return success
+    }
+
     fun syncToCloud(dramas: List<Drama>) {
         viewModelScope.launch {
-            if (!isOnline()) {
-                Toast.makeText(context, "Offline: Cannot sync to cloud.", Toast.LENGTH_SHORT).show()
-                return@launch
-            }
-            _isSyncing.value = true
-            try {
-                withTimeout(8000) {
-                    cloudSyncRepository.syncToCloud(dramas)
-                }
-            } catch (_: TimeoutCancellationException) {
-                Toast.makeText(context, "Sync timed out. Connection is too slow.", Toast.LENGTH_SHORT).show()
-            } catch (_: Exception) {
-                Toast.makeText(context, "Sync failed.", Toast.LENGTH_SHORT).show()
-            }
-            _isSyncing.value = false
+            syncToCloudInternal(dramas)
         }
     }
 

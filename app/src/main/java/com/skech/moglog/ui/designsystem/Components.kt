@@ -745,8 +745,8 @@ fun IosActionSheet(
                                 pressedScale = 0.99f,
                                 onClick = {
                                     if (action.isDestructive) haptics.warning() else haptics.lightImpact()
-                                    onDismissRequest()
                                     action.onClick()
+                                    onDismissRequest()
                                 }
                             ),
                         contentAlignment = Alignment.Center

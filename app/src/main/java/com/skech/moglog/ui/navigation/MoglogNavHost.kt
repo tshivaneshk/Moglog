@@ -442,6 +442,8 @@ fun MoglogNavHost(
         }
     }
 
+    var isCreatingAccount by remember { mutableStateOf(false) }
+
     if (pendingAuthResult != null) {
         IosActionSheet(
             title = "Create Cloud Backup Account?",
@@ -452,15 +454,29 @@ fun MoglogNavHost(
                     onClick = {
                         val result = pendingAuthResult
                         pendingAuthResult = null
+                        isCreatingAccount = true
                         if (result != null) {
-                            authViewModel.signIn(result)
-                            globalToast = IosToastData("Cloud account initialized")
+                            authViewModel.createAccountAndSync(result, dramas) { success ->
+                                isCreatingAccount = false
+                                if (success) {
+                                    scope.launch {
+                                        viewModel.settingsStore.setLastSyncedAt(System.currentTimeMillis())
+                                    }
+                                    globalToast = IosToastData("Cloud account created & sync enabled")
+                                } else {
+                                    globalToast = IosToastData("Failed to create cloud account")
+                                }
+                            }
+                        } else {
+                            isCreatingAccount = false
                         }
                     }
                 )
             ),
             onDismissRequest = {
-                scope.launch { authViewModel.authClient.signOut() }
+                if (!isCreatingAccount) {
+                    scope.launch { authViewModel.authClient.signOut() }
+                }
                 pendingAuthResult = null
             }
         )

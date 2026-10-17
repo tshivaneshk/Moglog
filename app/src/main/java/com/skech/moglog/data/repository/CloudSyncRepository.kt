@@ -95,17 +95,28 @@ class CloudSyncRepository(
                     backupColl.document("chunk_$idx").set(chunkDoc).await()
                 }
 
+                // Remove any stale extra chunks from previous larger backups
+                val existingChunks = backupColl.get().await()
+                for (doc in existingChunks.documents) {
+                    val idx = (doc.get("index") as? Number)?.toInt() ?: -1
+                    if (idx >= chunks.size) {
+                        doc.reference.delete().await()
+                    }
+                }
+
                 val rootData = hashMapOf<String, Any>(
                     "encryptedBackup" to false,
                     "backupChunks" to chunks.size,
-                    "dramas" to dramas,
                     "lastSyncedAt" to now,
+                    "dramas" to FieldValue.delete(),
                     // Explicitly delete any legacy plaintext tmdbApiKey stored in Firestore
                     "tmdbApiKey" to FieldValue.delete()
                 )
                 userDocRef.set(rootData, SetOptions.merge()).await()
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            android.util.Log.e("CloudSyncRepo", "syncToCloud error: ${e.message}", e)
+            throw e
         }
     }
 
