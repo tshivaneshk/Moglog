@@ -1,13 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
-   See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
--->
+<?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <!-- Exclude SQLCipher encrypted Room databases & WAL/SHM files because the Android Keystore master key is hardware-bound -->
+    <exclude domain="database" path="drama_db" />
+    <exclude domain="database" path="drama_db-wal" />
+    <exclude domain="database" path="drama_db-shm" />
+    <exclude domain="database" path="drama_db-journal" />
+
+    <!-- Exclude Tink Keystore-wrapped preferences & DataStore -->
+    <exclude domain="sharedpref" path="moglog_secure_store.xml" />
+    <exclude domain="sharedpref" path="moglog_tink_keyset_prefs.xml" />
+    <exclude domain="sharedpref" path="moglog_prefs.xml" />
+    <exclude domain="file" path="datastore/moglog_settings.preferences_pb" />
 </full-backup-content>

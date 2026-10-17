@@ -1,21 +1,46 @@
 # Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Keep Retrofit & Gson DTOs and domain models serialized to/from JSON
+-keepattributes Signature, InnerClasses, EnclosingMethod, RuntimeVisibleAnnotations
+-keep class com.skech.moglog.data.remote.** { *; }
+-keep class com.skech.moglog.domain.model.** { *; }
+-keep class com.skech.moglog.data.security.BackupEnvelopePayload { *; }
+-keep class com.skech.moglog.data.repository.CloudData { *; }
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep Room entities & DAOs
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class * { *; }
+-keep @androidx.room.Dao class * { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep SQLCipher native JNI hooks
+-keep class net.zetetic.database.** { *; }
+-keep class net.zetetic.database.sqlcipher.** { *; }
+-dontwarn net.zetetic.database.**
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep Google Tink crypto primitives
+-keep class com.google.crypto.tink.** { *; }
+-dontwarn com.google.crypto.tink.**
+-dontwarn com.google.errorprone.annotations.**
+
+# Keep Kotlinx Serialization route classes
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+-keepclassmembers class kotlinx.serialization.json.** {
+    *** Companion;
+}
+-keepclasseswithmembers class kotlinx.serialization.json.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-keep,includedescriptorclasses class com.skech.moglog.**$$serializer { *; }
+-keepclassmembers class com.skech.moglog.** {
+    *** Companion;
+}
+-keepclasseswithmembers class com.skech.moglog.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+# Strip debug/verbose Log calls from release builds
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int d(...);
+}

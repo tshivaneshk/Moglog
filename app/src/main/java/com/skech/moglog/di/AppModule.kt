@@ -137,12 +137,18 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideDramaDatabase(app: Application): DramaDatabase {
+    fun provideDramaDatabase(
+        app: Application,
+        secureStore: SecureStore
+    ): DramaDatabase {
+        val encryptedFactory = com.skech.moglog.data.security.SqlCipherMigrationHelper
+            .createEncryptedOpenHelperFactory(app, "drama_db", secureStore)
         return Room.databaseBuilder(
             app,
             DramaDatabase::class.java,
             "drama_db"
         )
+            .openHelperFactory(encryptedFactory)
             .addMigrations(MIGRATION_1_5, MIGRATION_5_6, MIGRATION_6_7)
             .build()
     }
@@ -188,8 +194,10 @@ object AppModule {
     fun provideCloudSyncRepository(
         firestore: FirebaseFirestore,
         auth: FirebaseAuth,
-        apiKeyManager: ApiKeyManager
+        apiKeyManager: ApiKeyManager,
+        secureStore: SecureStore,
+        settingsStore: SettingsStore
     ): CloudSyncRepository {
-        return CloudSyncRepository(firestore, auth, apiKeyManager)
+        return CloudSyncRepository(firestore, auth, apiKeyManager, secureStore, settingsStore)
     }
 }

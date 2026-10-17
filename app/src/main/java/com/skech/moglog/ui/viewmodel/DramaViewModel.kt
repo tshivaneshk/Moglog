@@ -277,19 +277,37 @@ class DramaViewModel @Inject constructor(
         passphrase: String? = null,
         onResult: (Boolean, String) -> Unit = { _, _ -> }
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             try {
                 val currentDramas = myDramas.value
-                val json = Gson().toJson(currentDramas)
+                val plainJson = Gson().toJson(currentDramas)
+                val outputPayload = if (!passphrase.isNullOrBlank()) {
+                    val envelope = com.skech.moglog.data.security.BackupCryptoEnvelope.encrypt(
+                        plaintextJson = plainJson,
+                        passphrase = passphrase,
+                        uid = "local"
+                    )
+                    com.skech.moglog.data.security.BackupCryptoEnvelope.serializeEnvelope(envelope)
+                } else {
+                    plainJson
+                }
+
                 val out = context.contentResolver.openOutputStream(uri)
                 if (out == null) {
-                    onResult(false, "Unable to open destination file.")
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        onResult(false, "Unable to open destination file.")
+                    }
                     return@launch
                 }
-                out.use { it.write(json.toByteArray(Charsets.UTF_8)) }
-                onResult(true, "Exported ${currentDramas.size} shows.")
+                out.use { it.write(outputPayload.toByteArray(Charsets.UTF_8)) }
+                val modeText = if (!passphrase.isNullOrBlank()) "encrypted .moglog" else "JSON"
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    onResult(true, "Exported ${currentDramas.size} shows ($modeText).")
+                }
             } catch (e: Exception) {
-                onResult(false, e.localizedMessage ?: "Export failed.")
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    onResult(false, e.localizedMessage ?: "Export failed.")
+                }
             }
         }
     }
@@ -300,25 +318,55 @@ class DramaViewModel @Inject constructor(
         passphrase: String? = null,
         onResult: (ImportSummary) -> Unit = {}
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             try {
                 val bytes = context.contentResolver.openInputStream(uri)?.use { stream ->
                     val maxBytes = 10 * 1024 * 1024 // 10 MB limit
                     val buffer = stream.readBytes()
                     if (buffer.size > maxBytes) {
-                        onResult(ImportSummary(0, 0, 0, "Backup file exceeds 10 MB limit."))
+                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                            onResult(ImportSummary(0, 0, 0, "Backup file exceeds 10 MB limit."))
+                        }
                         return@launch
                     }
                     buffer
                 } ?: run {
-                    onResult(ImportSummary(0, 0, 0, "Unable to read selected file."))
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        onResult(ImportSummary(0, 0, 0, "Unable to read selected file."))
+                    }
                     return@launch
                 }
 
-                val json = String(bytes, Charsets.UTF_8)
-                if (json.isBlank()) {
-                    onResult(ImportSummary(0, 0, 0, "Selected file is empty."))
+                val rawText = String(bytes, Charsets.UTF_8)
+                if (rawText.isBlank()) {
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        onResult(ImportSummary(0, 0, 0, "Selected file is empty."))
+                    }
                     return@launch
+                }
+
+                // Check if file is an encrypted BackupEnvelopePayload (.moglog)
+                val envelope = com.skech.moglog.data.security.BackupCryptoEnvelope.parseEnvelopeOrNull(rawText)
+                val json = if (envelope != null) {
+                    if (passphrase.isNullOrBlank()) {
+                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                            onResult(ImportSummary(0, 0, 0, "Passphrase required to unlock encrypted .moglog backup."))
+                        }
+                        return@launch
+                    }
+                    try {
+                        com.skech.moglog.data.security.BackupCryptoEnvelope.decrypt(
+                            envelope = envelope,
+                            passphrase = passphrase
+                        )
+                    } catch (_: Exception) {
+                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                            onResult(ImportSummary(0, 0, 0, "Incorrect passphrase or corrupted encrypted backup."))
+                        }
+                        return@launch
+                    }
+                } else {
+                    rawText
                 }
 
                 val type = object : TypeToken<List<Drama>>() {}.type
@@ -352,9 +400,13 @@ class DramaViewModel @Inject constructor(
                         skipped++
                     }
                 }
-                onResult(ImportSummary(added, updated, skipped))
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    onResult(ImportSummary(added, updated, skipped))
+                }
             } catch (e: Exception) {
-                onResult(ImportSummary(0, 0, 0, "Invalid backup format: ${e.localizedMessage ?: "Parse error"}"))
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    onResult(ImportSummary(0, 0, 0, "Invalid backup format: ${e.localizedMessage ?: "Parse error"}"))
+                }
             }
         }
     }

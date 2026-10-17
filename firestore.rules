@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Only the authenticated owner of {uid} may read/write their own document and backup chunks
+    match /users/{uid} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.size() <= 15
+        // Never permit storing plaintext TMDB API keys in Firestore
+        && !('tmdbApiKey' in request.resource.data);
+
+      match /backup/{chunkId} {
+        allow read, delete: if request.auth != null && request.auth.uid == uid;
+        allow create, update: if request.auth != null
+          && request.auth.uid == uid
+          && chunkId.matches('^chunk_[0-9]{1,3}$')
+          && request.resource.data.index is int
+          && request.resource.data.totalChunks is int
+          && request.resource.data.totalChunks <= 50;
+      }
+    }
+
+    // Deny all other paths by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
