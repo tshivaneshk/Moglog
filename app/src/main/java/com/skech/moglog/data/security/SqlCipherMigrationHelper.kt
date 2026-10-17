@@ -28,8 +28,8 @@ object SqlCipherMigrationHelper {
         val passphraseBytes = secureStore.getOrCreateDatabaseKey()
         try {
             migratePlaintextDbIfNeeded(context, dbName, passphraseBytes)
-        } catch (_: Exception) {
-            // If migration encounters an unexpected state, do not corrupt the original file
+        } catch (e: Exception) {
+            android.util.Log.e("SqlCipherMigration", "Database migration to SQLCipher failed: ${e.message}", e)
         }
         return SupportOpenHelperFactory(passphraseBytes)
     }
@@ -53,26 +53,32 @@ object SqlCipherMigrationHelper {
             tempEncryptedFile.delete()
         }
 
-        val plainDb = SQLiteDatabase.openDatabase(
-            dbFile.absolutePath,
-            ByteArray(0),
-            null,
-            SQLiteDatabase.OPEN_READWRITE,
+        // Open/create the target encrypted database using SQLCipher and the generated key
+        val encryptedDb = SQLiteDatabase.openOrCreateDatabase(
+            tempEncryptedFile.absolutePath,
+            passphraseBytes,
             null,
             null
         )
 
         try {
-            // Flush any WAL frames into the main plaintext file before exporting
-            plainDb.rawExecSQL("PRAGMA wal_checkpoint(FULL);")
-            val hexKey = passphraseBytes.joinToString("") { "%02x".format(it) }
-            plainDb.rawExecSQL(
-                "ATTACH DATABASE '${tempEncryptedFile.absolutePath}' AS encrypted KEY \"x'$hexKey'\";"
+            // Attach the existing plaintext database with an empty key ('')
+            encryptedDb.rawExecSQL(
+                "ATTACH DATABASE '${dbFile.absolutePath}' AS plaintext KEY '';"
             )
-            plainDb.rawExecSQL("SELECT sqlcipher_export('encrypted');")
-            plainDb.rawExecSQL("DETACH DATABASE encrypted;")
+            // Query source user_version before exporting
+            val cursor = encryptedDb.rawQuery("PRAGMA plaintext.user_version;", null)
+            val sourceVersion = if (cursor.moveToFirst()) cursor.getInt(0) else 0
+            cursor.close()
+
+            // Export schema, tables, indices, and data from plaintext INTO main (the open encrypted database)
+            encryptedDb.rawExecSQL("SELECT sqlcipher_export('main', 'plaintext');")
+
+            // Preserve the Room user_version on the newly created encrypted database so Room runs migrations
+            encryptedDb.rawExecSQL("PRAGMA main.user_version = $sourceVersion;")
+            encryptedDb.rawExecSQL("DETACH DATABASE plaintext;")
         } finally {
-            plainDb.close()
+            encryptedDb.close()
         }
 
         if (tempEncryptedFile.exists() && tempEncryptedFile.length() > 0L) {
