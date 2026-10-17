@@ -182,4 +182,5 @@
     <string name="common_apply">Apply</string>
     <string name="common_reset">Reset</string>
     <string name="offline_banner">Offline · Showing cached library</string>
+    <string name="widget_description">Quickly view and increment episodes for your Continue Watching shows.</string>
 </resources>
