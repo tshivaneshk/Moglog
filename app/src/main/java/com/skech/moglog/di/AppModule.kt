@@ -53,6 +53,29 @@ object AppModule {
         }
     }
 
+    val MIGRATION_6_7 = object : Migration(6, 7) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE dramas ADD COLUMN myRating REAL NOT NULL DEFAULT 0.0")
+            database.execSQL("ALTER TABLE dramas ADD COLUMN notes TEXT NOT NULL DEFAULT ''")
+            database.execSQL("ALTER TABLE dramas ADD COLUMN tags TEXT NOT NULL DEFAULT ''")
+            database.execSQL("ALTER TABLE dramas ADD COLUMN genres TEXT NOT NULL DEFAULT ''")
+            database.execSQL("ALTER TABLE dramas ADD COLUMN releaseYear INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE dramas ADD COLUMN totalSeasons INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE dramas ADD COLUMN currentSeason INTEGER NOT NULL DEFAULT 1")
+            database.execSQL("ALTER TABLE dramas ADD COLUMN currentEpisode INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE dramas ADD COLUMN nextEpisodeAirDate TEXT")
+            database.execSQL("ALTER TABLE dramas ADD COLUMN nextEpisodeNumber INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE dramas ADD COLUMN nextSeasonNumber INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE dramas ADD COLUMN deletedAt INTEGER NOT NULL DEFAULT 0")
+
+            database.execSQL("ALTER TABLE shortcuts ADD COLUMN dramaId INTEGER NOT NULL DEFAULT 0")
+
+            database.execSQL(
+                "CREATE TABLE IF NOT EXISTS `drama_details_cache` (`dramaId` INTEGER NOT NULL, `payloadJson` TEXT NOT NULL, `cachedAt` INTEGER NOT NULL, PRIMARY KEY(`dramaId`))"
+            )
+        }
+    }
+
     @Provides
     @Singleton
     fun provideSecureStore(app: Application): SecureStore {
@@ -120,7 +143,7 @@ object AppModule {
             DramaDatabase::class.java,
             "drama_db"
         )
-            .addMigrations(MIGRATION_1_5, MIGRATION_5_6)
+            .addMigrations(MIGRATION_1_5, MIGRATION_5_6, MIGRATION_6_7)
             .build()
     }
 
@@ -131,13 +154,16 @@ object AppModule {
         db: DramaDatabase,
         apiKeyManager: ApiKeyManager
     ): DramaRepository {
-        return DramaRepositoryImpl(api, db.dao, apiKeyManager)
+        return DramaRepositoryImpl(api, db.dao, db.detailCacheDao, apiKeyManager)
     }
 
     @Provides
     @Singleton
-    fun provideShortcutRepository(db: DramaDatabase): ShortcutRepository {
-        return ShortcutRepositoryImpl(db.shortcutDao)
+    fun provideShortcutRepository(
+        db: DramaDatabase,
+        apiKeyManager: ApiKeyManager
+    ): ShortcutRepository {
+        return ShortcutRepositoryImpl(db.shortcutDao, apiKeyManager)
     }
 
     @Provides

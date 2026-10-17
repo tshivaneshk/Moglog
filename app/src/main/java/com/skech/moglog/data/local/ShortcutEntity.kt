@@ -10,13 +10,14 @@ data class ShortcutEntity(
     val title: String,
     val data: String,
     val type: String,
-    val iconUrl: String? = null
+    val iconUrl: String? = null,
+    val dramaId: Int = 0
 )
 
 fun ShortcutEntity.toDomainModel(): Shortcut {
-    return Shortcut(id, title, data, type, iconUrl)
+    return Shortcut(id, title, data, type, iconUrl, dramaId)
 }
 
 fun Shortcut.toEntity(): ShortcutEntity {
-    return ShortcutEntity(id, title, data, type, iconUrl)
+    return ShortcutEntity(id, title, data, type, iconUrl, dramaId)
 }

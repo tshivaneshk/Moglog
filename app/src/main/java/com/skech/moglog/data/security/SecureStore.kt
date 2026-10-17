@@ -117,6 +117,8 @@ class SecureStore @Inject constructor(
         return randomBytes
     }
 
+    fun isValidTmdbCredential(input: String): Boolean = isValidTmdbCredentialFormat(input)
+
     /**
      * Optional Keystore-wrapped cache for the user's cloud backup passphrase / derived key.
      */
@@ -131,6 +133,12 @@ class SecureStore @Inject constructor(
             encryptAndPutString(KEY_BACKUP_PASSPHRASE, passphrase, AAD_BACKUP_PASSPHRASE)
         }
     }
+
+    fun getBackupPassphrase(): String = getCachedBackupPassphrase().orEmpty()
+
+    fun setBackupPassphrase(passphrase: String?) = setCachedBackupPassphrase(passphrase)
+
+    fun hasBackupPassphrase(): Boolean = !getCachedBackupPassphrase().isNullOrBlank()
 
     private fun encryptAndPutString(key: String, plaintext: String, aad: ByteArray) {
         val primitive = aead

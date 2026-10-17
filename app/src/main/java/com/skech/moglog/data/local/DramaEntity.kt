@@ -17,13 +17,75 @@ data class DramaEntity(
     val isDeleted: Boolean = false,
     val addedAt: Long = 0L,
     val updatedAt: Long = 0L,
-    val completedAt: Long = 0L
+    val completedAt: Long = 0L,
+    val myRating: Double = 0.0,
+    val notes: String = "",
+    val tags: String = "",
+    val genres: String = "",
+    val releaseYear: Int = 0,
+    val totalSeasons: Int = 0,
+    val currentSeason: Int = 1,
+    val currentEpisode: Int = 0,
+    val nextEpisodeAirDate: String? = null,
+    val nextEpisodeNumber: Int = 0,
+    val nextSeasonNumber: Int = 0,
+    val deletedAt: Long = 0L
 )
 
 fun DramaEntity.toDomainModel(): Drama {
-    return Drama(id, title, overview, rating, posterPath, status, episodesWatched, totalEpisodes, isDeleted, addedAt, updatedAt, completedAt)
+    return Drama(
+        id = id,
+        title = title,
+        overview = overview,
+        rating = rating,
+        posterPath = posterPath,
+        status = status,
+        episodesWatched = episodesWatched,
+        totalEpisodes = totalEpisodes,
+        isDeleted = isDeleted,
+        addedAt = addedAt,
+        updatedAt = updatedAt,
+        completedAt = completedAt,
+        myRating = myRating,
+        notes = notes,
+        tags = tags,
+        genres = genres,
+        releaseYear = releaseYear,
+        totalSeasons = totalSeasons,
+        currentSeason = currentSeason,
+        currentEpisode = currentEpisode,
+        nextEpisodeAirDate = nextEpisodeAirDate,
+        nextEpisodeNumber = nextEpisodeNumber,
+        nextSeasonNumber = nextSeasonNumber,
+        deletedAt = deletedAt
+    )
 }
 
 fun Drama.toEntity(): DramaEntity {
-    return DramaEntity(id, title, overview, rating, posterPath, status, episodesWatched, totalEpisodes, isDeleted, addedAt, updatedAt, completedAt)
+    return DramaEntity(
+        id = id,
+        title = title,
+        overview = overview,
+        rating = rating,
+        posterPath = posterPath,
+        status = status,
+        episodesWatched = episodesWatched,
+        totalEpisodes = totalEpisodes,
+        isDeleted = isDeleted,
+        addedAt = addedAt,
+        updatedAt = updatedAt,
+        completedAt = completedAt,
+        myRating = myRating,
+        notes = notes,
+        tags = tags,
+        genres = genres,
+        releaseYear = releaseYear,
+        totalSeasons = totalSeasons,
+        currentSeason = currentSeason,
+        currentEpisode = currentEpisode,
+        nextEpisodeAirDate = nextEpisodeAirDate,
+        nextEpisodeNumber = nextEpisodeNumber,
+        nextSeasonNumber = nextSeasonNumber,
+        deletedAt = deletedAt
+    )
 }
