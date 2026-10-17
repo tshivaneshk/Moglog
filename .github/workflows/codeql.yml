@@ -1,0 +1,79 @@
+name: "CodeQL Analysis"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '30 1 * * 1'
+
+jobs:
+  analyze:
+    name: Analyze (Java / Kotlin)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+
+    - name: Inject headless google-services.json for CI
+      run: |
+        mkdir -p app
+        cat << 'EOF' > app/google-services.json
+        {
+          "project_info": {
+            "project_number": "000000000000",
+            "project_id": "moglog-ci",
+            "storage_bucket": "moglog-ci.firebasestorage.app"
+          },
+          "client": [
+            {
+              "client_info": {
+                "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+                "android_client_info": {
+                  "package_name": "com.skech.moglog"
+                }
+              },
+              "oauth_client": [],
+              "api_key": [
+                {
+                  "current_key": "AIzaSyCiMockKeyForHeadlessStaticAnalysis"
+                }
+              ],
+              "services": {}
+            }
+          ],
+          "configuration_version": "1"
+        }
+        EOF
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: java-kotlin
+        build-mode: manual
+
+    - name: Build code for CodeQL
+      run: |
+        ./gradlew compileDebugSources --no-daemon
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:java-kotlin"
